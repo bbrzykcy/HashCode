@@ -1,11 +1,6 @@
-﻿using System;
+﻿using HashCode.Properties;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HashCode.Properties;
 
 namespace HashCode {
 
@@ -17,9 +12,10 @@ namespace HashCode {
             string b_read_on = Resources.b_read_on;
             string c_incunabula = Resources.c_incunabula;
             string d_tough_choices = Resources.d_tough_choices;
+            string e_so_many_books = Resources.e_so_many_books;
             string f_libraries_of_the_world = Resources.f_libraries_of_the_world;
 
-            var splitted = example.Split( '\n' );
+            var splitted = d_tough_choices.Split( '\n' );
             var books = int.Parse( splitted[0].Split( ' ' )[0] );
             var days = int.Parse( splitted[0].Split( ' ' )[2] );
             var scores = splitted[1].Split( ' ' ).Select( int.Parse ).ToArray();
@@ -29,19 +25,22 @@ namespace HashCode {
                 bookScores.Add( i, scores[i] );
             }
             List<Library> libraries = new List<Library>();
+            int counter = 0;
             for ( int i = 2; i < splitted.Length - 2; i += 2 ) {
                 libraries.Add( new Library {
+                    LibraryId = counter, // Unikalny identyfikator
                     Books = splitted[i + 1].Split( ' ' ).Select( int.Parse ).ToArray(),
                     BooksPerDay = int.Parse( splitted[i].Split( ' ' )[1] ),
-                    SignupProcess = int.Parse( splitted[i].Split( ' ' )[2] )
+                    SignupProcessDays = int.Parse( splitted[i].Split( ' ' )[2] ),
+                    ScannedBooks = new List<int>()
                 }
                 );
                 libraries.Last().CreateValues( bookScores );
-
+                counter++;
             }
 
             /*var query = from item in libraries
-                        select new { s = $"{item.Books.Length} {item.BooksPerDay} {item.SignupProcess} Wskaźnik: {item.Pointer}" };
+                        select new { s = $"{item.Books.Length} {item.BooksPerDay} {item.SignupProcessDays} Wskaźnik: {item.Pointer}" };
 
             foreach ( var item in query ) {
                 Debug.WriteLine( item.s );
@@ -49,6 +48,7 @@ namespace HashCode {
 
             Scanning scanning = new Scanning();
             scanning.Process( libraries, days );
+
 
         }
 

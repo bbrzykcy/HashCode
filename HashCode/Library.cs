@@ -19,11 +19,7 @@ namespace HashCode {
 
             var orderedBookScores = bookScores.OrderBy( pair => -pair.Value ).ToDictionary( pair => pair.Key, pair => pair.Value );
 
-            for ( int i = 0; i < orderedBookScores.Count; i++ ) {
-                if ( Books.Contains( i ) ) {
-                    PossibleMaxScore += orderedBookScores[i];
-                }
-            }
+            PossibleMaxScore = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).Sum( pair => pair.Value );
 
             BooksByScore = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).ToDictionary( pair => pair.Key, pair => pair.Value ).Keys.ToArray();
             Pointer = PossibleMaxScore * BooksPerDay * SignupProcessDays / ( double )Books.Length;
@@ -44,14 +40,19 @@ namespace HashCode {
             return false;
         }
 
-        public void ScanningProcess() {
+        public List<int> ScanningProcess( List<int> allScannedBooks ) {
+
+            var result = new List<int>( BooksByScore.Length >= BooksPerDay
+                ? BooksByScore.Take( BooksPerDay )
+                : BooksByScore.Take( BooksByScore.Length ) );
 
             ScannedBooks.AddRange( BooksByScore.Length >= BooksPerDay
                 ? BooksByScore.Take( BooksPerDay )
-                : BooksByScore.Take( BooksByScore.Count() ) );
+                : BooksByScore.Take( BooksByScore.Length ) );
 
-            BooksByScore = BooksByScore.Skip( BooksByScore.Count() >= BooksPerDay ? BooksPerDay : BooksByScore.Length ).ToArray();
+            BooksByScore = BooksByScore.Skip( BooksByScore.Length >= BooksPerDay ? BooksPerDay : BooksByScore.Length ).ToArray();
 
+            return result;
         }
     }
 

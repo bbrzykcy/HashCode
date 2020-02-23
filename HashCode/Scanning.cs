@@ -13,6 +13,9 @@ namespace HashCode {
             // Ustawiamy biblioteki w kolejności od najwyższego Pointera
             List<Library> orderedLibraries = librariesList.OrderBy( library => -library.Pointer ).ToList();
 
+            // bool flag = true;
+            // while ( flag ) {
+            //     flag = false;
             //Dla każdej biblioteki sprawdzamy czy książki do skanowania nie pojawiły się w zaagregowanej tabeli wszystkich książek (distinct) z poprzednich bibliotek. Jeśli jakaś książka z danej biblioteki pojawia się w aktualnej bibliotece to ją usuwamy - jeżeli wszystkie ksiązki z aktualnej biblioteki zostały usunięte to usuwamy bibliotekę, ponieważ skanowanie książek będzie bezpunktowe.
             orderedLibraries.ForEach( library => {
                 var tempList = new List<int>();
@@ -20,7 +23,26 @@ namespace HashCode {
                          tempList.AddRange( library1.BooksByScore.ToList().Distinct() ) );
                 library.BooksByScore = library.BooksByScore.Where( i => !tempList.Contains( i ) ).ToArray();
             } );
+
+            //Dla każdej biblioteki sprawdzamy czy nie usuneliśmy jakiejś książki, a jeśli usunęliśmy i są jakieś książki w tablicy usuniętych z etapu pierwszego obliczania danych( Library.CalculateValues() ) to dodajemy. Usuwamy wszystkie biblioteki, które nie mają książek do zeskanowania. Na nowo obliczamy wskaźnik - mógł się zmienić.
+            orderedLibraries.ForEach( library => {
+                if ( library.BooksByScore.Length == library.BooksByScoreLength || library.DeletedBooks == null ) return;
+                int difference = library.BooksByScoreLength - library.BooksByScore.Length;
+                var tempList = library.BooksByScore.ToList();
+                int deletedBooksCount = difference >= library.DeletedBooks.Count ? library.DeletedBooks.Count : difference;
+                var tempDeletedBooks = library.DeletedBooks.Where( ( i, i1 ) => i1 >= deletedBooksCount ).ToList();
+                tempList.AddRange( library.DeletedBooks.Take( deletedBooksCount ) );
+                library.DeletedBooks = tempDeletedBooks;
+                library.BooksByScore = tempList.ToArray();
+                library.BooksByScoreLength = library.BooksByScore.Length;
+                // if ( !flag ) {
+                //     flag = true;
+                // }
+            } );
             orderedLibraries = orderedLibraries.Where( library => library.BooksByScore.Length > 0 ).ToList();
+            orderedLibraries.ForEach( library => library.RecalculateValues( orderedBookScores, days ) );
+            orderedLibraries = orderedLibraries.OrderBy( library => -library.Pointer ).ToList();
+            // }
 
             // Jeśli suma dni rejestracji bibliotek >= liczbie wszystkich dni, to wiemy, że ostatnia biblioteka nie zeskanuje żadnej książki, tak więc szukamy jakiejś co zdobyła by dla nas kilka dodatkowych punktów i podmieniamy, nawet jeśli miała by zeskanować jedną książke
             int daysSum = 0;

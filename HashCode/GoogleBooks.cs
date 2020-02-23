@@ -38,8 +38,7 @@ namespace HashCode {
                         LibraryId = counter, // Unikalny identyfikator
                         Books = splitted[i + 1].Split( ' ' ).Select( int.Parse ).ToArray(),
                         SignupProcessDays = int.Parse( splitted[i].Split( ' ' )[1] ),
-                        BooksPerDay = int.Parse( splitted[i].Split( ' ' )[2] ),
-                        ScannedBooks = new List<int>()
+                        BooksPerDay = int.Parse( splitted[i].Split( ' ' )[2] )
                     }
                     );
                     libraries.Last().CreateValues( orderedBookScores, days );

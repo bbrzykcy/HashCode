@@ -8,7 +8,9 @@ namespace HashCode {
         public int LibraryId { get; set; }
         public int[] Books { get; set; }
         public int[] BooksByScore { get; set; }
-        public List<int> ScannedBooks { get; set; }
+        public int BooksByScoreLength { get; set; }
+        public List<int> DeletedBooks { get; set; }
+        public List<int> ScannedBooks { get; set; } = new List<int>();
         public int SignupProcessDays { get; set; }
         public int BooksPerDay { get; set; }
         public long PossibleMaxScore { get; set; }
@@ -17,12 +19,21 @@ namespace HashCode {
 
         public void CreateValues( Dictionary<int, int> orderedBookScores, int days ) {
 
-            int maxPossibleBooks = days * BooksPerDay - SignupProcessDays * BooksPerDay;
+            long maxPossibleBooks = days * ( long )BooksPerDay - SignupProcessDays * ( long )BooksPerDay;
+            if ( maxPossibleBooks > Books.Length ) {
+                maxPossibleBooks = Books.Length;
+            }
             var matchedBooks = orderedBookScores.Where( pair => Books.Contains( pair.Key ) );
             var keyValuePairs = matchedBooks.ToList();
-            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= maxPossibleBooks ? maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
+            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= ( int )maxPossibleBooks ? ( int )maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
 
             BooksByScore = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).ToDictionary( pair => pair.Key, pair => pair.Value ).Keys.ToArray();
+
+            if ( BooksByScore.Length >= maxPossibleBooks ) {
+                DeletedBooks = BooksByScore.Where( ( i, i1 ) => i1 >= maxPossibleBooks ).ToList();
+                BooksByScore = BooksByScore.Take( ( int )maxPossibleBooks ).ToArray();
+            }
+            BooksByScoreLength = BooksByScore.Length;
 
             Pointer = PossibleMaxScore / ( double )SignupProcessDays;
 
@@ -30,10 +41,14 @@ namespace HashCode {
 
         public void RecalculateValues( Dictionary<int, int> orderedBookScores, int daysLeft ) {
 
-            int maxPossibleBooks = daysLeft * BooksPerDay - SignupProcessDays * BooksPerDay;
-            var matchedBooks = orderedBookScores.Where( pair => Books.Contains( pair.Key ) );
+            long maxPossibleBooks = daysLeft * ( long )BooksPerDay - SignupProcessDays * ( long )BooksPerDay;
+            if ( maxPossibleBooks > Books.Length ) {
+                maxPossibleBooks = Books.Length;
+            }
+
+            var matchedBooks = orderedBookScores.Where( pair => BooksByScore.Contains( pair.Key ) );
             var keyValuePairs = matchedBooks.ToList();
-            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= maxPossibleBooks ? maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
+            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= ( int )maxPossibleBooks ? ( int )maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
 
             Pointer = PossibleMaxScore / ( double )SignupProcessDays;
 

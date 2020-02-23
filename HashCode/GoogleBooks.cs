@@ -21,13 +21,16 @@ namespace HashCode {
             foreach ( var dataSet in dataSets ) {
 
                 var splitted = dataSet.Value.Split( '\n' );
-                var books = int.Parse( splitted[0].Split( ' ' )[0] );
-                var days = int.Parse( splitted[0].Split( ' ' )[2] );
+                int books = int.Parse( splitted[0].Split( ' ' )[0] );
+                int days = int.Parse( splitted[0].Split( ' ' )[2] );
                 var scores = splitted[1].Split( ' ' ).Select( int.Parse ).ToArray();
+
                 Dictionary<int, int> bookScores = new Dictionary<int, int>();
                 for ( int i = 0; i < books; i++ ) {
                     bookScores.Add( i, scores[i] );
                 }
+                var orderedBookScores = bookScores.OrderBy( pair => -pair.Value ).ToDictionary( pair => pair.Key, pair => pair.Value );
+
                 List<Library> libraries = new List<Library>();
                 int counter = 0;
                 for ( int i = 2; i < splitted.Length - 2; i += 2 ) {
@@ -39,13 +42,13 @@ namespace HashCode {
                         ScannedBooks = new List<int>()
                     }
                     );
-                    libraries.Last().CreateValues( bookScores );
+                    libraries.Last().CreateValues( orderedBookScores, days );
                     counter++;
                 }
 
                 Scanning scanning = new Scanning();
                 string resultPath = $"{Path.Combine( Directory.GetCurrentDirectory(), dataSet.Key )}";
-                scanning.Process( libraries, days, resultPath );
+                scanning.Process( libraries, days, orderedBookScores, resultPath );
 
             }
 

@@ -15,21 +15,36 @@ namespace HashCode {
         public double Pointer { get; set; }
         public bool IsSignupProcessing { get; set; }
 
-        public void CreateValues( Dictionary<int, int> bookScores ) {
+        public void CreateValues( Dictionary<int, int> orderedBookScores, int days ) {
 
-            var orderedBookScores = bookScores.OrderBy( pair => -pair.Value ).ToDictionary( pair => pair.Key, pair => pair.Value );
-
-            PossibleMaxScore = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).Sum( pair => pair.Value );
+            int maxPossibleBooks = days * BooksPerDay - SignupProcessDays * BooksPerDay;
+            var matchedBooks = orderedBookScores.Where( pair => Books.Contains( pair.Key ) );
+            var keyValuePairs = matchedBooks.ToList();
+            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= maxPossibleBooks ? maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
 
             BooksByScore = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).ToDictionary( pair => pair.Key, pair => pair.Value ).Keys.ToArray();
-            Pointer = PossibleMaxScore * BooksPerDay * SignupProcessDays / ( double )Books.Length;
+
+            Pointer = PossibleMaxScore / ( double )SignupProcessDays;
+
+        }
+
+        public void RecalculateValues( Dictionary<int, int> orderedBookScores, int daysLeft ) {
+
+            int maxPossibleBooks = daysLeft * BooksPerDay - SignupProcessDays * BooksPerDay;
+            var matchedBooks = orderedBookScores.Where( pair => Books.Contains( pair.Key ) );
+            var keyValuePairs = matchedBooks.ToList();
+            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= maxPossibleBooks ? maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
+
+            Pointer = PossibleMaxScore / ( double )SignupProcessDays;
 
         }
 
         public bool SignupProcess() {
+
             if ( SignupProcessDays == 0 ) {
                 return false;
             }
+
             if ( IsSignupProcessing == false )
                 IsSignupProcessing = true;
 
@@ -37,7 +52,9 @@ namespace HashCode {
             if ( SignupProcessDays == 0 ) {
                 IsSignupProcessing = false;
             }
+
             return false;
+
         }
 
         public List<int> ScanningProcess( List<int> allScannedBooks ) {
@@ -53,7 +70,9 @@ namespace HashCode {
             BooksByScore = BooksByScore.Skip( BooksByScore.Length >= BooksPerDay ? BooksPerDay : BooksByScore.Length ).ToArray();
 
             return result;
+
         }
+
     }
 
 }

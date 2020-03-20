@@ -23,9 +23,8 @@ namespace HashCode {
             if ( maxPossibleBooks > Books.Length ) {
                 maxPossibleBooks = Books.Length;
             }
-            var matchedBooks = orderedBookScores.Where( pair => Books.Contains( pair.Key ) );
-            var keyValuePairs = matchedBooks.ToList();
-            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= ( int )maxPossibleBooks ? ( int )maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
+            var matchedBooks = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).ToList();
+            PossibleMaxScore = matchedBooks.Take( matchedBooks.Count >= ( int )maxPossibleBooks ? ( int )maxPossibleBooks : matchedBooks.Count ).Sum( pair => pair.Value );
 
             BooksByScore = orderedBookScores.Where( pair => Books.Contains( pair.Key ) ).ToDictionary( pair => pair.Key, pair => pair.Value ).Keys.ToArray();
 
@@ -46,9 +45,8 @@ namespace HashCode {
                 maxPossibleBooks = Books.Length;
             }
 
-            var matchedBooks = orderedBookScores.Where( pair => BooksByScore.Contains( pair.Key ) );
-            var keyValuePairs = matchedBooks.ToList();
-            PossibleMaxScore = keyValuePairs.Take( keyValuePairs.Count >= ( int )maxPossibleBooks ? ( int )maxPossibleBooks : keyValuePairs.Count ).Sum( pair => pair.Value );
+            var matchedBooks = orderedBookScores.Where( pair => BooksByScore.Contains( pair.Key ) ).ToList();
+            PossibleMaxScore = matchedBooks.Take( matchedBooks.Count >= ( int )maxPossibleBooks ? ( int )maxPossibleBooks : matchedBooks.Count ).Sum( pair => pair.Value );
 
             Pointer = PossibleMaxScore / ( double )SignupProcessDays;
 
@@ -72,15 +70,13 @@ namespace HashCode {
 
         }
 
-        public List<int> ScanningProcess( List<int> allScannedBooks ) {
+        public List<int> ScanningProcess() {
 
             var result = new List<int>( BooksByScore.Length >= BooksPerDay
                 ? BooksByScore.Take( BooksPerDay )
                 : BooksByScore.Take( BooksByScore.Length ) );
 
-            ScannedBooks.AddRange( BooksByScore.Length >= BooksPerDay
-                ? BooksByScore.Take( BooksPerDay )
-                : BooksByScore.Take( BooksByScore.Length ) );
+            ScannedBooks.AddRange( result );
 
             BooksByScore = BooksByScore.Skip( BooksByScore.Length >= BooksPerDay ? BooksPerDay : BooksByScore.Length ).ToArray();
 

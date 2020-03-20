@@ -97,7 +97,7 @@ namespace HashCode {
 
                     if ( library.SignupProcessDays == 0 && library.BooksByScore.Length > 0 || ( ( actualSignUpLibrary?.Equals( library ) ?? true ) && library.SignupProcess() ) ) {
                         //Skanujemy i przypisujemy zeskanowane do listy wszystkich zeskanowanych
-                        AllScannedBooks.AddRange( library.ScanningProcess( AllScannedBooks ) );
+                        AllScannedBooks.AddRange( library.ScanningProcess() );
                     }
 
                 }
